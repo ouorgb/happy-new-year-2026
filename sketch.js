@@ -13,7 +13,7 @@ let sparkles = [];
 
 
 let marqueeX = 0;
-let marqueeSpeed = 2.5; 
+let marqueeSpeed = 1.0; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
 const allWords = [

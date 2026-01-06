@@ -47,7 +47,7 @@ function preload() {
   try {
     myFont = loadFont('Orbit-Regular.ttf');
   } catch (e) {
-    console.log("폰트 로딩 에러: 기본 폰트를 사용합니다.");
+    console.log("폰트 로딩 에러");
   }
 }
 
@@ -80,11 +80,9 @@ function draw() {
       let hand = hands[i];
       if (hand && hand.keypoints && hand.keypoints[8]) {
         let indexTip = hand.keypoints[8];
-        
         fill(0, 255, 0); 
         noStroke();
         ellipse(indexTip.x, indexTip.y, 10, 10);
-        
         checkIndexGesture(hand, i);
         if (i === 0 && hand.keypoints[0]) checkShake(hand.keypoints[0]);
       }
@@ -107,7 +105,7 @@ function draw() {
       }
     }
     fill(255);
-    textSize(24);
+    textSize(width < 600 ? 18 : 24);
     textAlign(CENTER, CENTER);
     text(w.txt, w.x, w.y);
   }
@@ -121,17 +119,14 @@ function drawMarquee() {
   fill(250, 250, 90);
   noStroke();
   rect(0, 0, width, 25); 
-
   fill(130, 0, 20);
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
-  textSize(15); 
+  textSize(14); 
   textAlign(LEFT, CENTER);
-
   let tw = textWidth(marqueeText);
   text(marqueeText, marqueeX, 12.5);
   text(marqueeText, marqueeX + tw, 12.5);
-
   marqueeX -= marqueeSpeed;
   if (marqueeX <= -tw) marqueeX = 0;
   pop();
@@ -142,10 +137,18 @@ function drawCenteredASCII() {
   fill(250, 250, 90); 
   textFont('monospace');
   
-  let dynamicSize = min(width / 45, height / 30); 
-  dynamicSize = constrain(dynamicSize, 12, 45); 
-  textSize(dynamicSize);
+  let isMobile = width < height;
+  let dynamicSize;
   
+  if (isMobile) {
+    dynamicSize = width / 28;
+    dynamicSize = constrain(dynamicSize, 14, 25); 
+  } else {
+    dynamicSize = min(width / 45, height / 30);
+    dynamicSize = constrain(dynamicSize, 12, 45); 
+  }
+  
+  textSize(dynamicSize);
   let lineHeight = dynamicSize * 1.1; 
   
   let maxW = 0;
@@ -172,7 +175,8 @@ function checkIndexGesture(hand, index) {
   let indexKnuckle = hand.keypoints[5];
   let middleTip = hand.keypoints[12];
   
-  let isPointing = (indexTip.y < indexKnuckle.y - 40) && (indexTip.y < middleTip.y - 40);
+  let threshold = width < 600 ? 25 : 40;
+  let isPointing = (indexTip.y < indexKnuckle.y - threshold) && (indexTip.y < middleTip.y - threshold);
 
   if (isPointing) {
     if (millis() - lastGestureTimes[index] > 300) {
@@ -223,10 +227,8 @@ function checkShake(wrist) {
   let diffX = abs(wrist.x - prevWristX);
   let diffY = abs(wrist.y - prevWristY);
   let totalDiff = diffX + diffY;
-  
   if (totalDiff > 40) shakeAmount += totalDiff;
   else shakeAmount *= 0.95; 
-  
   if (shakeAmount > 2000) { 
     fixedWords = []; 
     sparkles = []; 

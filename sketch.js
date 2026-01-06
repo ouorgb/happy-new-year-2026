@@ -1,3 +1,9 @@
+/* * ===========================================================
+ * Project: Happy New Year 2026 - Year of the Horse
+ * Copyright (c) 2026 @ouorgb. All rights reserved.
+ * ===========================================================
+ */
+
 let handPose;
 let video;
 let hands = [];

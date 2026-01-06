@@ -15,11 +15,6 @@ let marqueeX = 0;
 let marqueeSpeed = 1.0; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
-const allWords = [
-  "병오년", "복", "HORSE", "HAPPY", "NEW YEAR", "LOVE", "LUCK", "MONEY", "WORK", "FAMILY", "FRIEND", "PET",
-  "이공이육", "근하신년", "아자아자", "으쌰으쌰"
-];
-
 
 const backgroundCode = [
   "1 | class Happy 2026 {",
@@ -54,16 +49,18 @@ function preload() {
   try {
     myFont = loadFont('Orbit-Regular.ttf');
   } catch (e) {
-    console.log("폰트 로딩 에러: 기본 폰트를 사용합니다.");
+    console.log("폰트 로딩 에러");
   }
 }
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  
+  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas.style('display', 'block');
+  
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
   video.hide();
-
 
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     console.log("준비 완료! 무한 복 쌓기!");
@@ -78,24 +75,19 @@ function windowResized() {
 }
 
 function draw() {
-  background(130, 0, 20);
+  background(130, 0, 20); 
 
-  // 1
+  
   drawCenteredASCII();
 
-  // 2
-  if (hands && hands.length > 0) {
-    for (let i = 0; i < hands.length; i++) {
-      let hand = hands[i];
-      let indexTip = hand.keypoints[8];
-      
 
-      fill(0, 255, 0); 
-      noStroke();
+  if (hands && hands.length > 0) {
+    for (let hand of hands) {
+      let indexTip = hand.keypoints[8];
+      fill(0, 255, 0); noStroke();
       ellipse(indexTip.x, indexTip.y, 10, 10);
-      
-      checkIndexGesture(hand, i);
-      if (i === 0) checkShake(hand.keypoints[0]);
+      checkIndexGesture(hand, hands.indexOf(hand));
+      if (hands.indexOf(hand) === 0) checkShake(hand.keypoints[0]);
     }
   }
 
@@ -123,7 +115,7 @@ function draw() {
 
   drawSparkles();
 
-  // 4. 상단 전광판 그리기
+
   drawMarquee();
 }
 
@@ -154,25 +146,23 @@ function drawCenteredASCII() {
   textFont('monospace');
   
 
-  let dynamicSize = width / 70; 
-  dynamicSize = constrain(dynamicSize, 10, 22); 
+  let dynamicSize = width / 80; 
+  dynamicSize = constrain(dynamicSize, 10, 24); 
   textSize(dynamicSize);
-  
-  let lineHeight = dynamicSize * 1.2; 
+  let lineHeight = dynamicSize * 1.25; 
   
 
   let maxW = 0;
   for (let line of backgroundCode) {
-    let currentW = textWidth(line);
+    let currentW = textWidth(line.trimEnd()); 
     if (currentW > maxW) maxW = currentW;
   }
   
-  let totalH = backgroundCode.length * lineHeight;
+  let totalHeight = backgroundCode.length * lineHeight;
   
-  
+
   let startX = (width - maxW) / 2;
-  let startY = (height - totalH) / 2;
-  
+  let startY = (height - totalHeight) / 2;
   
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
@@ -183,37 +173,22 @@ function drawCenteredASCII() {
 
 function createSparkles(x, y) {
   for (let i = 0; i < 8; i++) {
-    sparkles.push({ 
-      x: x + random(-15, 15), 
-      y: y + random(-10, 10), 
-      size: random(2, 5), 
-      alpha: 255, 
-      driftX: random(-1, 1), 
-      driftY: random(-1.5, 0.5) 
-    });
+    sparkles.push({ x: x + random(-15, 15), y: y + random(-10, 10), size: random(2, 5), alpha: 255, driftX: random(-1, 1), driftY: random(-1.5, 0.5) });
   }
 }
 
 function drawSparkles() {
-  push(); 
-  noStroke();
+  push(); noStroke();
   for (let i = sparkles.length - 1; i >= 0; i--) {
-    let s = sparkles[i]; 
-    s.alpha -= 10; 
-    s.x += s.driftX; 
-    s.y += s.driftY;
+    let s = sparkles[i]; s.alpha -= 10; s.x += s.driftX; s.y += s.driftY;
     if (s.alpha <= 0) { sparkles.splice(i, 1); continue; }
-    fill(255, 250, 90, s.alpha); 
-    ellipse(s.x, s.y, s.size, s.size);
+    fill(255, 250, 90, s.alpha); ellipse(s.x, s.y, s.size, s.size);
   }
   pop();
 }
 
 function checkIndexGesture(hand, index) {
-  let indexTip = hand.keypoints[8];
-  let indexKnuckle = hand.keypoints[5];
-  let middleTip = hand.keypoints[12];
-  
+  let indexTip = hand.keypoints[8], indexKnuckle = hand.keypoints[5], middleTip = hand.keypoints[12];
   let isPointing = (indexTip.y < indexKnuckle.y - 40) && (indexTip.y < middleTip.y - 40);
 
   if (isPointing) {
@@ -233,23 +208,12 @@ function checkIndexGesture(hand, index) {
 }
 
 function checkShake(wrist) {
-  let diffX = abs(wrist.x - prevWristX);
-  let diffY = abs(wrist.y - prevWristY);
+  let diffX = abs(wrist.x - prevWristX), diffY = abs(wrist.y - prevWristY);
   let totalDiff = diffX + diffY;
-  
   if (totalDiff > 40) shakeAmount += totalDiff;
   else shakeAmount *= 0.95; 
-  
-  if (shakeAmount > 2000) { 
-    fixedWords = []; 
-    sparkles = []; 
-    shakeAmount = 0; 
-  }
-  prevWristX = wrist.x; 
-  prevWristY = wrist.y;
+  if (shakeAmount > 2000) { fixedWords = []; sparkles = []; shakeAmount = 0; }
+  prevWristX = wrist.x; prevWristY = wrist.y;
 }
 
-function mousePressed() { 
-  fixedWords = []; 
-  sparkles = []; 
-}
+function mousePressed() { fixedWords = []; sparkles = []; }

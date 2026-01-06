@@ -4,7 +4,6 @@ let hands = [];
 let myFont; 
 let fixedWords = [];
 let sparkles = [];
-
 let marqueeX = 0;
 let marqueeSpeed = 1.2; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
@@ -47,7 +46,7 @@ function preload() {
   try {
     myFont = loadFont('Orbit-Regular.ttf');
   } catch (e) {
-    console.log("폰트 로딩 에러");
+    console.log("Font Error");
   }
 }
 
@@ -56,13 +55,11 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
   video.hide();
-
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     handPose.detectStart(video, (results) => { 
       hands = results; 
     });
   });
-  
   marqueeX = 0;
 }
 
@@ -72,9 +69,7 @@ function windowResized() {
 
 function draw() {
   background(130, 0, 20); 
-
   drawCenteredASCII();
-
   if (hands && hands.length > 0) {
     for (let i = 0; i < hands.length; i++) {
       let hand = hands[i];
@@ -88,10 +83,8 @@ function draw() {
       }
     }
   }
-
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
-  
   for (let i = fixedWords.length - 1; i >= 0; i--) {
     let w = fixedWords[i];
     if (w.y < w.targetY) {
@@ -105,11 +98,10 @@ function draw() {
       }
     }
     fill(255);
-    textSize(width < 600 ? 18 : 24);
+    textSize(width < 600 ? 16 : 24);
     textAlign(CENTER, CENTER);
     text(w.txt, w.x, w.y);
   }
-
   drawSparkles();
   drawMarquee();
 }
@@ -137,15 +129,18 @@ function drawCenteredASCII() {
   fill(250, 250, 90); 
   textFont('monospace');
   
-  let isMobile = width < height;
-  let dynamicSize;
+  let longestLine = "";
+  for (let line of backgroundCode) {
+    if (line.length > longestLine.length) longestLine = line;
+  }
   
-  if (isMobile) {
-    dynamicSize = width / 28;
-    dynamicSize = constrain(dynamicSize, 14, 25); 
-  } else {
-    dynamicSize = min(width / 45, height / 30);
-    dynamicSize = constrain(dynamicSize, 12, 45); 
+  textSize(10);
+  let currentTextW = textWidth(longestLine);
+  let calculatedSize = (width * 0.9) / currentTextW * 10;
+  
+  let dynamicSize = constrain(calculatedSize, 8, 45);
+  if (dynamicSize * backgroundCode.length > height * 0.7) {
+    dynamicSize = (height * 0.7) / backgroundCode.length;
   }
   
   textSize(dynamicSize);
@@ -153,13 +148,15 @@ function drawCenteredASCII() {
   
   let maxW = 0;
   for (let line of backgroundCode) {
-    let currentW = textWidth(line);
-    if (currentW > maxW) maxW = currentW;
+    let w = textWidth(line);
+    if (w > maxW) maxW = w;
   }
   
   let totalH = backgroundCode.length * lineHeight;
   let startX = (width - maxW) / 2;
   let startY = (height - totalH) / 2;
+  
+  if (startY < 30) startY = 30;
   
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
@@ -170,14 +167,11 @@ function drawCenteredASCII() {
 
 function checkIndexGesture(hand, index) {
   if (!hand.keypoints[8] || !hand.keypoints[5] || !hand.keypoints[12]) return;
-
   let indexTip = hand.keypoints[8];
   let indexKnuckle = hand.keypoints[5];
   let middleTip = hand.keypoints[12];
-  
-  let threshold = width < 600 ? 25 : 40;
+  let threshold = width < 600 ? 20 : 40;
   let isPointing = (indexTip.y < indexKnuckle.y - threshold) && (indexTip.y < middleTip.y - threshold);
-
   if (isPointing) {
     if (millis() - lastGestureTimes[index] > 300) {
       let stackOffset = (fixedWords.length % 25) * 4; 

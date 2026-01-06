@@ -8,6 +8,15 @@
  */
 
 
+/* * ===========================================================
+ * Project: Happy New Year 2026 - Year of the Horse
+ * Copyright (c) 2026 parksinyoung. All rights reserved.
+ * * NOTICE: Unauthorized copying, modification, and distribution 
+ * of this file is strictly prohibited. 
+ * Proprietary and confidential.
+ * ===========================================================
+ */
+
 let handPose;
 let video;
 let hands = [];
@@ -47,9 +56,7 @@ const backgroundCode = [
 ];
 
 let lastGestureTimes = [0, 0]; 
-let prevWristX = 0;
-let prevWristY = 0; 
-let shakeAmount = 0;
+let prevWristX = 0, prevWristY = 0, shakeAmount = 0;
 
 function preload() {
   try {
@@ -61,27 +68,13 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-  
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
-  video.elt.setAttribute('playsinline', ''); 
-  video.elt.setAttribute('muted', 'true');
   video.hide();
 
-  const options = { 
-    flipHorizontal: true, 
-    detectionConfidence: 0.6,
-    maxHands: 2 
-  };
-  
-  handPose = ml5.handPose(video, options, () => {
-    console.log("준비 완료!");
-    handPose.detectStart(video, (results) => {
-      hands = results;
-    });
+  handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
+    handPose.detectStart(video, (results) => { hands = results; });
   });
-
-  textAlign(CENTER, CENTER);
 }
 
 function windowResized() {
@@ -98,13 +91,10 @@ function draw() {
   if (hands && hands.length > 0) {
     for (let hand of hands) {
       let indexTip = hand.keypoints[8];
-      fill(255, 255, 0); 
-      noStroke();
+      fill(255, 255, 0); noStroke();
       ellipse(indexTip.x, indexTip.y, 10, 10);
-      
-      let i = hands.indexOf(hand);
-      checkIndexGesture(hand, i); 
-      if (i === 0) checkShake(hand.keypoints[0]);
+      checkIndexGesture(hand, hands.indexOf(hand));
+      if (hands.indexOf(hand) === 0) checkShake(hand.keypoints[0]);
     }
   }
 
@@ -115,7 +105,9 @@ function draw() {
   for (let i = fixedWords.length - 1; i >= 0; i--) {
     let w = fixedWords[i];
     if (w.y < w.targetY) {
-      w.y += w.speed * 8; 
+    
+      w.y += w.speed * 0.8; 
+      w.x += sin(frameCount * 0.05 + i) * 0.2; 
     } else {
       if (!w.landed) {
         w.y = w.targetY;
@@ -132,33 +124,21 @@ function draw() {
   drawSparkles();
 }
 
-
 function drawFixedASCII() {
   push();
   fill(250, 250, 90); 
   textFont('monospace');
-  
- 
   let fontSize = min(width / 32, height / 32); 
   fontSize = constrain(fontSize, 18, 45); 
   textSize(fontSize);
-  
-
   let longestLine = "";
-  for (let line of backgroundCode) {
-    if (line.length > longestLine.length) longestLine = line;
-  }
-  
+  for (let line of backgroundCode) { if (line.length > longestLine.length) longestLine = line; }
   let blockWidth = textWidth(longestLine);
   let lineHeight = fontSize * 1.2; 
   let totalHeight = backgroundCode.length * lineHeight;
-
-  // 정중앙 좌표 계산
   let startX = (width - blockWidth) / 2;
   let startY = (height - totalHeight) / 2;
-
   textAlign(LEFT, TOP); 
-  
   for (let i = 0; i < backgroundCode.length; i++) {
     text(backgroundCode[i], startX, startY + i * lineHeight);
   }
@@ -167,40 +147,22 @@ function drawFixedASCII() {
 
 function createSparkles(x, y) {
   for (let i = 0; i < 8; i++) {
-    sparkles.push({
-      x: x + random(-15, 15),
-      y: y + random(-10, 10),
-      size: random(2, 5),
-      alpha: 255,
-      driftX: random(-1, 1),
-      driftY: random(-1.5, 0.5)
-    });
+    sparkles.push({ x: x + random(-15, 15), y: y + random(-10, 10), size: random(2, 5), alpha: 255, driftX: random(-1, 1), driftY: random(-1.5, 0.5) });
   }
 }
 
 function drawSparkles() {
-  push();
-  noStroke();
+  push(); noStroke();
   for (let i = sparkles.length - 1; i >= 0; i--) {
-    let s = sparkles[i];
-    s.alpha -= 10;
-    s.x += s.driftX;
-    s.y += s.driftY;
-    if (s.alpha <= 0) {
-      sparkles.splice(i, 1);
-      continue;
-    }
-    fill(255, 255, 0, s.alpha); 
-    ellipse(s.x, s.y, s.size, s.size);
+    let s = sparkles[i]; s.alpha -= 10; s.x += s.driftX; s.y += s.driftY;
+    if (s.alpha <= 0) { sparkles.splice(i, 1); continue; }
+    fill(255, 255, 0, s.alpha); ellipse(s.x, s.y, s.size, s.size);
   }
   pop();
 }
 
 function checkIndexGesture(hand, index) {
-  let indexTip = hand.keypoints[8];
-  let indexKnuckle = hand.keypoints[5];
-  let middleTip = hand.keypoints[12];
-  
+  let indexTip = hand.keypoints[8], indexKnuckle = hand.keypoints[5], middleTip = hand.keypoints[12];
   let isPointing = (indexTip.y < indexKnuckle.y - 40) && (indexTip.y < middleTip.y - 40);
 
   if (isPointing) {
@@ -211,7 +173,8 @@ function checkIndexGesture(hand, index) {
         x: indexTip.x, 
         y: indexTip.y,
         targetY: height - 60 - stackOffset, 
-        speed: random(1, 1.5),
+ 
+        speed: random(0.5, 1.2), 
         landed: false 
       });
       lastGestureTimes[index] = millis();
@@ -220,23 +183,12 @@ function checkIndexGesture(hand, index) {
 }
 
 function checkShake(wrist) {
-  let diffX = abs(wrist.x - prevWristX);
-  let diffY = abs(wrist.y - prevWristY);
+  let diffX = abs(wrist.x - prevWristX), diffY = abs(wrist.y - prevWristY);
   let totalDiff = diffX + diffY;
-  
   if (totalDiff > 40) shakeAmount += totalDiff;
   else shakeAmount *= 0.95; 
-
-  if (shakeAmount > 2000) {
-    fixedWords = [];
-    sparkles = [];
-    shakeAmount = 0;
-  }
+  if (shakeAmount > 2000) { fixedWords = []; sparkles = []; shakeAmount = 0; }
   prevWristX = wrist.x; prevWristY = wrist.y;
 }
 
-function mousePressed() {
-  fixedWords = [];
-  sparkles = [];
-}
-
+function mousePressed() { fixedWords = []; sparkles = []; }

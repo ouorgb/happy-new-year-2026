@@ -11,10 +11,15 @@ let myFont;
 let fixedWords = [];
 let sparkles = [];
 
+
 let marqueeX = 0;
 let marqueeSpeed = 1.0; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
+const allWords = [
+  "병오년", "복", "HORSE", "HAPPY", "NEW YEAR", "LOVE", "LUCK", "MONEY", "WORK", "FAMILY", "FRIEND", "PET",
+  "이공이육", "근하신년", "아자아자", "으쌰으쌰"
+];
 
 const backgroundCode = [
   "1 | class Happy 2026 {",
@@ -49,7 +54,7 @@ function preload() {
   try {
     myFont = loadFont('Orbit-Regular.ttf');
   } catch (e) {
-    console.log("폰트 로딩 에러");
+    console.log("폰트 로딩 에러: 기본 폰트를 사용합니다.");
   }
 }
 
@@ -58,6 +63,7 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
   video.hide();
+
 
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     console.log("준비 완료! 무한 복 쌓기!");
@@ -74,10 +80,10 @@ function windowResized() {
 function draw() {
   background(130, 0, 20); 
 
-
+  // 1
   drawCenteredASCII();
 
-
+  // 2
   if (hands && hands.length > 0) {
     for (let hand of hands) {
       let indexTip = hand.keypoints[8];
@@ -112,6 +118,7 @@ function draw() {
 
   drawSparkles();
 
+ 
   drawMarquee();
 }
 
@@ -125,11 +132,13 @@ function drawMarquee() {
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   textSize(15); 
+
   textAlign(LEFT, CENTER);
 
   let tw = textWidth(marqueeText);
-  text(marqueeText, marqueeX, 12.5);
-  text(marqueeText, marqueeX + tw, 12.5);
+
+  text(marqueeText, marqueeX, 13);
+  text(marqueeText, marqueeX + tw, 13);
 
   marqueeX -= marqueeSpeed;
   if (marqueeX <= -tw) marqueeX = 0;
@@ -138,28 +147,27 @@ function drawMarquee() {
 
 function drawCenteredASCII() {
   push();
-
   fill(250, 250, 90); 
+  textFont('monospace');
   
 
-  textFont('monospace');
-  let dynamicSize = width / 80; 
-  dynamicSize = constrain(dynamicSize, 10, 22); 
+  let dynamicSize = width / 55; 
+  dynamicSize = constrain(dynamicSize, 12, 30); 
   textSize(dynamicSize);
   
-  let lineHeight = dynamicSize * 1.25; 
-
-  let maxW = 0;
+  let lineHeight = dynamicSize * 1.2; 
+  
+ 
+  let longestLine = "";
   for (let line of backgroundCode) {
-    let currentW = textWidth(line);
-    if (currentW > maxW) maxW = currentW;
+    if (line.length > longestLine.length) longestLine = line;
   }
-  
-  let totalH = backgroundCode.length * lineHeight;
+  let blockWidth = textWidth(longestLine);
+  let totalHeight = backgroundCode.length * lineHeight;
   
 
-  let startX = (width - maxW) / 2;
-  let startY = (height + 25 - totalH) / 2;
+  let startX = (width - blockWidth) / 2;
+  let startY = (height - totalHeight) / 2;
   
 
   textAlign(LEFT, TOP); 

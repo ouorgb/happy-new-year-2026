@@ -1,9 +1,3 @@
-/* * ===========================================================
- * Project: Happy New Year 2026 - Year of the Horse
- * Copyright (c) 2026 parksinyoung. All rights reserved.
- * ===========================================================
- */
-
 let handPose;
 let video;
 let hands = [];
@@ -12,7 +6,7 @@ let fixedWords = [];
 let sparkles = [];
 
 let marqueeX = 0;
-let marqueeSpeed = 1.0; 
+let marqueeSpeed = 1.2; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
 const allWords = [
@@ -63,10 +57,10 @@ function setup() {
   video.size(windowWidth, windowHeight);
   video.hide();
 
-
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
-    console.log("준비 완료! 무한 복 쌓기!");
-    handPose.detectStart(video, (results) => { hands = results; });
+    handPose.detectStart(video, (results) => { 
+      hands = results; 
+    });
   });
   
   marqueeX = 0;
@@ -81,22 +75,21 @@ function draw() {
 
   drawCenteredASCII();
 
-
   if (hands && hands.length > 0) {
     for (let i = 0; i < hands.length; i++) {
       let hand = hands[i];
-      let indexTip = hand.keypoints[8];
-      
-
-      fill(0, 255, 0); 
-      noStroke();
-      ellipse(indexTip.x, indexTip.y, 10, 10);
-      
-      checkIndexGesture(hand, i);
-      if (i === 0) checkShake(hand.keypoints[0]);
+      if (hand && hand.keypoints && hand.keypoints[8]) {
+        let indexTip = hand.keypoints[8];
+        
+        fill(0, 255, 0); 
+        noStroke();
+        ellipse(indexTip.x, indexTip.y, 10, 10);
+        
+        checkIndexGesture(hand, i);
+        if (i === 0 && hand.keypoints[0]) checkShake(hand.keypoints[0]);
+      }
     }
   }
-
 
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
@@ -104,8 +97,8 @@ function draw() {
   for (let i = fixedWords.length - 1; i >= 0; i--) {
     let w = fixedWords[i];
     if (w.y < w.targetY) {
-      w.y += w.speed * 0.8; 
-      w.x += sin(frameCount * 0.05 + i) * 0.2; 
+      w.y += w.speed; 
+      w.x += sin(frameCount * 0.05 + i) * 0.5; 
     } else {
       if (!w.landed) {
         w.y = w.targetY;
@@ -120,8 +113,6 @@ function draw() {
   }
 
   drawSparkles();
-
-
   drawMarquee();
 }
 
@@ -151,14 +142,12 @@ function drawCenteredASCII() {
   fill(250, 250, 90); 
   textFont('monospace');
   
-
-  let dynamicSize = width / 70; 
-  dynamicSize = constrain(dynamicSize, 10, 22); 
+  let dynamicSize = min(width / 45, height / 30); 
+  dynamicSize = constrain(dynamicSize, 12, 45); 
   textSize(dynamicSize);
   
-  let lineHeight = dynamicSize * 1.2; 
+  let lineHeight = dynamicSize * 1.1; 
   
-
   let maxW = 0;
   for (let line of backgroundCode) {
     let currentW = textWidth(line);
@@ -166,15 +155,39 @@ function drawCenteredASCII() {
   }
   
   let totalH = backgroundCode.length * lineHeight;
-
   let startX = (width - maxW) / 2;
   let startY = (height - totalH) / 2;
-
+  
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
     text(backgroundCode[i], startX, startY + i * lineHeight);
   }
   pop();
+}
+
+function checkIndexGesture(hand, index) {
+  if (!hand.keypoints[8] || !hand.keypoints[5] || !hand.keypoints[12]) return;
+
+  let indexTip = hand.keypoints[8];
+  let indexKnuckle = hand.keypoints[5];
+  let middleTip = hand.keypoints[12];
+  
+  let isPointing = (indexTip.y < indexKnuckle.y - 40) && (indexTip.y < middleTip.y - 40);
+
+  if (isPointing) {
+    if (millis() - lastGestureTimes[index] > 300) {
+      let stackOffset = (fixedWords.length % 25) * 4; 
+      fixedWords.push({
+        txt: random(allWords),
+        x: indexTip.x, 
+        y: indexTip.y,
+        targetY: height - 60 - stackOffset, 
+        speed: random(2, 4), 
+        landed: false 
+      });
+      lastGestureTimes[index] = millis();
+    }
+  }
 }
 
 function createSparkles(x, y) {
@@ -205,30 +218,8 @@ function drawSparkles() {
   pop();
 }
 
-function checkIndexGesture(hand, index) {
-  let indexTip = hand.keypoints[8];
-  let indexKnuckle = hand.keypoints[5];
-  let middleTip = hand.keypoints[12];
-  
-  let isPointing = (indexTip.y < indexKnuckle.y - 40) && (indexTip.y < middleTip.y - 40);
-
-  if (isPointing) {
-    if (millis() - lastGestureTimes[index] > 300) {
-      let stackOffset = (fixedWords.length % 25) * 4; 
-      fixedWords.push({
-        txt: random(allWords),
-        x: indexTip.x, 
-        y: indexTip.y,
-        targetY: height - 60 - stackOffset, 
-        speed: random(0.5, 1.2), 
-        landed: false 
-      });
-      lastGestureTimes[index] = millis();
-    }
-  }
-}
-
 function checkShake(wrist) {
+  if (!wrist) return;
   let diffX = abs(wrist.x - prevWristX);
   let diffY = abs(wrist.y - prevWristY);
   let totalDiff = diffX + diffY;

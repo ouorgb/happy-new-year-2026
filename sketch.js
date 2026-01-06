@@ -11,7 +11,6 @@ let myFont;
 let fixedWords = [];
 let sparkles = [];
 
-
 let marqueeX = 0;
 let marqueeSpeed = 1.0; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
@@ -54,7 +53,7 @@ function preload() {
   try {
     myFont = loadFont('Orbit-Regular.ttf');
   } catch (e) {
-    console.log("폰트 로딩 에러: 기본 폰트를 사용합니다.");
+    console.log("폰트 로딩 에러");
   }
 }
 
@@ -63,7 +62,6 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
   video.hide();
-
 
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     console.log("준비 완료! 무한 복 쌓기!");
@@ -80,10 +78,10 @@ function windowResized() {
 function draw() {
   background(130, 0, 20); 
 
-  // 1
+
   drawCenteredASCII();
 
-  // 2
+
   if (hands && hands.length > 0) {
     for (let hand of hands) {
       let indexTip = hand.keypoints[8];
@@ -118,7 +116,6 @@ function draw() {
 
   drawSparkles();
 
-
   drawMarquee();
 }
 
@@ -132,13 +129,12 @@ function drawMarquee() {
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   textSize(15); 
-
   textAlign(LEFT, CENTER);
 
   let tw = textWidth(marqueeText);
 
-  text(marqueeText, marqueeX, 13);
-  text(marqueeText, marqueeX + tw, 13);
+  text(marqueeText, marqueeX, 12.5);
+  text(marqueeText, marqueeX + tw, 12.5);
 
   marqueeX -= marqueeSpeed;
   if (marqueeX <= -tw) marqueeX = 0;
@@ -151,13 +147,13 @@ function drawCenteredASCII() {
   textFont('monospace');
   
 
-  let dynamicSize = width / 55; 
-  dynamicSize = constrain(dynamicSize, 12, 30); // 너무 커지거나 작아지지 않게 제한
+  let dynamicSize = width / 80; 
+  dynamicSize = constrain(dynamicSize, 10, 24); 
   textSize(dynamicSize);
   
   let lineHeight = dynamicSize * 1.2; 
   
- 
+
   let longestLine = "";
   for (let line of backgroundCode) {
     if (line.length > longestLine.length) longestLine = line;
@@ -169,7 +165,6 @@ function drawCenteredASCII() {
   let startX = (width - blockWidth) / 2;
   let startY = (height - totalHeight) / 2;
   
-
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
     text(backgroundCode[i], startX, startY + i * lineHeight);

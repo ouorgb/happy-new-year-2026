@@ -1,0 +1,10 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 스크롤바 방지 */
+  background-color: #820014; /* 와인색 배경과 일치 */
+}
+
+canvas {
+  display: block; /* 캔버스 하단 여백 제거 */
+}

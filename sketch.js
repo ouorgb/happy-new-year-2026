@@ -64,14 +64,13 @@ function setup() {
   video.size(windowWidth, windowHeight);
   video.hide();
 
-  
+  // 거울 모드 유지
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     console.log("준비 완료! 무한 복 쌓기!");
     handPose.detectStart(video, (results) => { hands = results; });
   });
   
   marqueeX = 0;
-  textAlign(CENTER, CENTER);
 }
 
 function windowResized() {
@@ -79,10 +78,10 @@ function windowResized() {
 }
 
 function draw() {
-  background(130, 0, 20);
+  background(130, 0, 20); 
 
   // 1
-  drawFixedASCII();
+  drawCenteredASCII();
 
   // 2
   if (hands && hands.length > 0) {
@@ -119,7 +118,7 @@ function draw() {
 
   drawSparkles();
 
-  // 4
+  // 4. 상단 전광판 (두께 25px, 수직 정렬 최적화)
   drawMarquee();
 }
 
@@ -133,30 +132,44 @@ function drawMarquee() {
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   textSize(15); 
+
   textAlign(LEFT, CENTER);
 
   let tw = textWidth(marqueeText);
-  text(marqueeText, marqueeX, 12.5);
-  text(marqueeText, marqueeX + tw, 12.5);
+
+  text(marqueeText, marqueeX, 13);
+  text(marqueeText, marqueeX + tw, 13);
 
   marqueeX -= marqueeSpeed;
   if (marqueeX <= -tw) marqueeX = 0;
   pop();
 }
 
-function drawFixedASCII() {
+function drawCenteredASCII() {
   push();
   fill(250, 250, 90); 
   textFont('monospace');
+  
+
   let dynamicSize = width / 55; 
+  dynamicSize = constrain(dynamicSize, 12, 30);
   textSize(dynamicSize);
+  
+  let lineHeight = dynamicSize * 1.2; 
+  
+
   let longestLine = "";
-  for (let line of backgroundCode) { if (line.length > longestLine.length) longestLine = line; }
+  for (let line of backgroundCode) {
+    if (line.length > longestLine.length) longestLine = line;
+  }
   let blockWidth = textWidth(longestLine);
-  let lineHeight = dynamicSize * 1.3; 
   let totalHeight = backgroundCode.length * lineHeight;
-  let startX = 20; 
+  
+
+  let startX = (width - blockWidth) / 2;
   let startY = (height - totalHeight) / 2;
+  
+
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
     text(backgroundCode[i], startX, startY + i * lineHeight);

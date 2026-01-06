@@ -15,10 +15,6 @@ let marqueeX = 0;
 let marqueeSpeed = 1.0; 
 let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
-const allWords = [
-  "병오년", "복", "HORSE", "HAPPY", "NEW YEAR", "LOVE", "LUCK", "MONEY", "WORK", "FAMILY", "FRIEND", "PET",
-  "이공이육", "근하신년", "아자아자", "으쌰으쌰"
-];
 
 const backgroundCode = [
   "1 | class Happy 2026 {",
@@ -132,7 +128,6 @@ function drawMarquee() {
   textAlign(LEFT, CENTER);
 
   let tw = textWidth(marqueeText);
-
   text(marqueeText, marqueeX, 12.5);
   text(marqueeText, marqueeX + tw, 12.5);
 
@@ -143,28 +138,30 @@ function drawMarquee() {
 
 function drawCenteredASCII() {
   push();
+
   fill(250, 250, 90); 
-  textFont('monospace');
   
 
+  textFont('monospace');
   let dynamicSize = width / 80; 
-  dynamicSize = constrain(dynamicSize, 10, 24); 
+  dynamicSize = constrain(dynamicSize, 10, 22); 
   textSize(dynamicSize);
   
-  let lineHeight = dynamicSize * 1.2; 
-  
+  let lineHeight = dynamicSize * 1.25; 
 
-  let longestLine = "";
+  let maxW = 0;
   for (let line of backgroundCode) {
-    if (line.length > longestLine.length) longestLine = line;
+    let currentW = textWidth(line);
+    if (currentW > maxW) maxW = currentW;
   }
-  let blockWidth = textWidth(longestLine);
-  let totalHeight = backgroundCode.length * lineHeight;
+  
+  let totalH = backgroundCode.length * lineHeight;
   
 
-  let startX = (width - blockWidth) / 2;
-  let startY = (height - totalHeight) / 2;
+  let startX = (width - maxW) / 2;
+  let startY = (height + 25 - totalH) / 2;
   
+
   textAlign(LEFT, TOP); 
   for (let i = 0; i < backgroundCode.length; i++) {
     text(backgroundCode[i], startX, startY + i * lineHeight);

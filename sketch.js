@@ -64,7 +64,7 @@ function setup() {
   video.size(windowWidth, windowHeight);
   video.hide();
 
-  // 거울 모드 유지
+
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     console.log("준비 완료! 무한 복 쌓기!");
     handPose.detectStart(video, (results) => { hands = results; });
@@ -94,7 +94,7 @@ function draw() {
     }
   }
 
-  // 3
+
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   
@@ -118,7 +118,7 @@ function draw() {
 
   drawSparkles();
 
-  // 4. 상단 전광판 (두께 25px, 수직 정렬 최적화)
+
   drawMarquee();
 }
 
@@ -152,12 +152,12 @@ function drawCenteredASCII() {
   
 
   let dynamicSize = width / 55; 
-  dynamicSize = constrain(dynamicSize, 12, 30);
+  dynamicSize = constrain(dynamicSize, 12, 30); // 너무 커지거나 작아지지 않게 제한
   textSize(dynamicSize);
   
   let lineHeight = dynamicSize * 1.2; 
   
-
+ 
   let longestLine = "";
   for (let line of backgroundCode) {
     if (line.length > longestLine.length) longestLine = line;

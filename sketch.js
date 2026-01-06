@@ -127,7 +127,7 @@ function drawMarquee() {
   push();
   fill(250, 250, 90);
   noStroke();
-  rect(0, 0, width, 20); 
+  rect(0, 0, width, 25); 
 
   fill(130, 0, 20);
   if (myFont) textFont(myFont);

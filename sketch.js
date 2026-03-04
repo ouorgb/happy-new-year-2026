@@ -12,7 +12,8 @@ let fixedWords = [];
 let sparkles = [];
 let marqueeX = 0;
 let marqueeSpeed = 1.2; 
-let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다        ";
+
+let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
 
 const allWords = [
   "병오년", "복", "HORSE", "HAPPY", "NEW YEAR", "LOVE", "LUCK", "MONEY", "WORK", "FAMILY", "FRIEND", "PET",
@@ -67,7 +68,7 @@ function setup() {
       hands = results; 
     });
   });
-
+  
   marqueeX = 0;
 }
 
@@ -120,32 +121,30 @@ function draw() {
 
 function drawMarquee() {
   push();
-
   fill(250, 250, 90);
   noStroke();
   rect(0, 0, width, 25); 
-
+  
   fill(130, 0, 20);
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   textSize(14); 
   textAlign(LEFT, CENTER);
   
-  let tw = textWidth(marqueeText);
+ 
+  let tw = textWidth(marqueeText) || 100;
   
+  let xPos = marqueeX;
+  while (xPos < width) {
+    text(marqueeText, xPos, 12.5);
+    xPos += tw; 
+  }
+  
+ 
+  marqueeX -= marqueeSpeed;
 
-  if (tw > 0) {
-    for (let x = marqueeX; x < width; x += tw) {
-      text(marqueeText, x, 12.5);
-    }
-    
-    // 왼쪽으로 이동
-    marqueeX -= marqueeSpeed;
-    
-    // 텍스트 한 문장 너비만큼 이동했다면 리셋 (무한 반복 루프)
-    if (marqueeX <= -tw) {
-      marqueeX = 0;
-    }
+  if (marqueeX <= -tw) {
+    marqueeX = 0;
   }
   pop();
 }

@@ -12,7 +12,7 @@ let fixedWords = [];
 let sparkles = [];
 let marqueeX = 0;
 let marqueeSpeed = 1.2; 
-let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다          ";
+let marqueeText = "카메라 허용을 한 뒤 검지손가락을 멀리서 들어보세요 복이 쏟아집니다        ";
 
 const allWords = [
   "병오년", "복", "HORSE", "HAPPY", "NEW YEAR", "LOVE", "LUCK", "MONEY", "WORK", "FAMILY", "FRIEND", "PET",
@@ -32,15 +32,15 @@ const backgroundCode = [
   "10|                  #                 *#*****",
   "11|                  #                   #    *#",
   "12|                  #                  _ #    /  #",
-  "13|                  #            /     _ **\\  / #    #",
+  "13|                  #            /      _ **\\  / #    #",
   "14|                   * _  .   / ****** * * _    /  \\    #",
   "15|                  # * `    \\  \\        ` ` \\ \\  \\  \\",
   "16|                 / /       \\  \\           # /  \\  \\  *\\ \\*",
   "17|                 \\ *,       \\  \\         /* /   \\  \\    *",
-  "18|                  \\_/        \\ \\        (  /     \\  \\",
+  "18|                  \\_/        \\ \\        (  /      \\  \\",
   "19|                             / )        ( ;      /  )",
   "20|                            /_\\          `      /_\\",
-  "21|     }",
+  "21|      }",
   "22|   name = \"happy_new_year_world\";", 
   "23| }"
 ];
@@ -61,21 +61,26 @@ function setup() {
   video = createCapture(VIDEO);
   video.size(windowWidth, windowHeight);
   video.hide();
+  
   handPose = ml5.handPose(video, { flipHorizontal: true }, () => {
     handPose.detectStart(video, (results) => { 
       hands = results; 
     });
   });
-  marqueeX = 0;
+  
+
+  marqueeX = width;
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
+  if (marqueeX > width) marqueeX = width;
 }
 
 function draw() {
   background(130, 0, 20); 
   drawCenteredASCII();
+  
   if (hands && hands.length > 0) {
     for (let i = 0; i < hands.length; i++) {
       let hand = hands[i];
@@ -89,8 +94,10 @@ function draw() {
       }
     }
   }
+  
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
+  
   for (let i = fixedWords.length - 1; i >= 0; i--) {
     let w = fixedWords[i];
     if (w.y < w.targetY) {
@@ -108,6 +115,7 @@ function draw() {
     textAlign(CENTER, CENTER);
     text(w.txt, w.x, w.y);
   }
+  
   drawSparkles();
   drawMarquee();
 }
@@ -117,16 +125,24 @@ function drawMarquee() {
   fill(250, 250, 90);
   noStroke();
   rect(0, 0, width, 25); 
+  
   fill(130, 0, 20);
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
   textSize(14); 
   textAlign(LEFT, CENTER);
+  
   let tw = textWidth(marqueeText);
+  
   text(marqueeText, marqueeX, 12.5);
   text(marqueeText, marqueeX + tw, 12.5);
+  
   marqueeX -= marqueeSpeed;
-  if (marqueeX <= -tw) marqueeX = 0;
+  
+
+  if (marqueeX <= -tw) {
+    marqueeX = 0;
+  }
   pop();
 }
 

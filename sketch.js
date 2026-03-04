@@ -67,7 +67,7 @@ function setup() {
       hands = results; 
     });
   });
-  
+
   marqueeX = 0;
 }
 
@@ -120,10 +120,11 @@ function draw() {
 
 function drawMarquee() {
   push();
+
   fill(250, 250, 90);
   noStroke();
   rect(0, 0, width, 25); 
-  
+
   fill(130, 0, 20);
   if (myFont) textFont(myFont);
   else textFont('sans-serif');
@@ -131,15 +132,20 @@ function drawMarquee() {
   textAlign(LEFT, CENTER);
   
   let tw = textWidth(marqueeText);
+  
 
-  for (let i = 0; i <= width / tw + 1; i++) {
-    text(marqueeText, marqueeX + (i * tw), 12.5);
-  }
-  
-  marqueeX -= marqueeSpeed;
-  
-  if (marqueeX <= -tw) {
-    marqueeX = 0;
+  if (tw > 0) {
+    for (let x = marqueeX; x < width; x += tw) {
+      text(marqueeText, x, 12.5);
+    }
+    
+    // 왼쪽으로 이동
+    marqueeX -= marqueeSpeed;
+    
+    // 텍스트 한 문장 너비만큼 이동했다면 리셋 (무한 반복 루프)
+    if (marqueeX <= -tw) {
+      marqueeX = 0;
+    }
   }
   pop();
 }

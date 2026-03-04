@@ -68,13 +68,11 @@ function setup() {
     });
   });
   
-
-  marqueeX = width;
+  marqueeX = 0;
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
-  if (marqueeX > width) marqueeX = width;
 }
 
 function draw() {
@@ -133,13 +131,13 @@ function drawMarquee() {
   textAlign(LEFT, CENTER);
   
   let tw = textWidth(marqueeText);
-  
-  text(marqueeText, marqueeX, 12.5);
-  text(marqueeText, marqueeX + tw, 12.5);
+
+  for (let i = 0; i <= width / tw + 1; i++) {
+    text(marqueeText, marqueeX + (i * tw), 12.5);
+  }
   
   marqueeX -= marqueeSpeed;
   
-
   if (marqueeX <= -tw) {
     marqueeX = 0;
   }
